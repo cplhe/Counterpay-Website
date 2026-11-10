@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CounterPay Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: a racing-green "counter" hero with a live receipt, then alternating paper and green bands; receipts and ledgers as the recurring motif. */
+:root {
+  --bg: #F3F5F1;
+  --surface: #FFFFFF;
+  --ink: #0F2219;
+  --muted: #55665C;
+  --line: #D3DCD5;
+  --green: #0A4A2E;
+  --green-soft: #E3ECE5;
+  --brass: #9C6A1C;
+  --band: #0B3A25;
+  --band-2: #0F462D;
+  --on-band: #F1F5F1;
+  --on-band-muted: #B6C8BC;
+  --band-line: #2A5C44;
+  --brass-on-band: #D9AE5F;
+  --receipt: #FBFBF7;
+  --receipt-ink: #1A2620;
+  --ok: #1F7A4B;
+  --display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --body: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+  --mono: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+  --maxw: 1160px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #09130E; --surface: #0F1D16; --ink: #E6EDE8; --muted: #9AABA1; --line: #22362B;
+    --green: #6CC195; --green-soft: #14281E; --brass: #D7A957;
+    --band: #062619; --band-2: #0A2F1F; --on-band: #EAF1EC; --on-band-muted: #A7BBAE; --band-line: #1F4A35; --brass-on-band: #DDB467;
+    --receipt: #F4F3EC; --receipt-ink: #18221D; --ok: #1F7A4B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #09130E; --surface: #0F1D16; --ink: #E6EDE8; --muted: #9AABA1; --line: #22362B;
+  --green: #6CC195; --green-soft: #14281E; --brass: #D7A957;
+  --band: #062619; --band-2: #0A2F1F; --on-band: #EAF1EC; --on-band-muted: #A7BBAE; --band-line: #1F4A35; --brass-on-band: #DDB467;
+  --receipt: #F4F3EC; --receipt-ink: #18221D; --ok: #1F7A4B;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--band); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; border-radius: 4px; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+section { padding-block: 96px; }
+.band { background: var(--band); color: var(--on-band); }
+h1, h2, h3 { font-family: var(--display); font-weight: 500; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h2 { font-size: clamp(2rem, 4.2vw, 3.1rem); line-height: 1.08; }
+h3 { font-size: 1.45rem; line-height: 1.2; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brass); }
+.band .eyebrow { color: var(--brass-on-band); }
+.lede { font-size: 1.15rem; color: var(--muted); max-width: 62ch; }
+.band .lede { color: var(--on-band-muted); }
+.head { display: grid; gap: 16px; margin-bottom: 52px; max-width: 760px; }
+.fine { font-size: 0.8rem; color: var(--muted); max-width: 90ch; }
+.band .fine { color: var(--on-band-muted); }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px; font-weight: 600; font-size: 0.98rem; text-decoration: none; transition: transform .15s ease, background .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn-brass { background: var(--brass-on-band); color: #1A1406; }
+.btn-ghost { border: 1px solid var(--band-line); color: var(--on-band); }
+.btn-ghost:hover { background: var(--band-2); }
+
+/* Nav */
+header.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--band); color: var(--on-band); border-bottom: 1px solid var(--band-line); }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 78px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-family: var(--body); font-size: 1.8rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; white-space: nowrap; }
+.brand .coin { flex: none; width: 42px; height: 42px; }
+.brand .wm > span { color: var(--brass-on-band); }
+.brand .wm small { display: block; font-size: 0.36em; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase; margin-top: 5px; opacity: .8; text-align: center; padding-left: 0.32em; }
+footer .brand { font-size: 1.5rem; }
+footer .brand .coin { width: 34px; height: 34px; }
+@media (max-width: 560px) { .nav .brand { font-size: 1.45rem; } .nav .brand .coin { width: 34px; height: 34px; } .nav .wrap > .btn { display: none; } }
+.nav nav { display: flex; gap: 26px; font-size: 0.93rem; }
+.nav nav a { text-decoration: none; color: var(--on-band-muted); }
+.nav nav a:hover { color: var(--on-band); }
+.nav .btn { padding: 9px 16px; font-size: 0.88rem; }
+@media (max-width: 880px) { .nav nav { display: none; } }
+
+/* Hero */
+.hero { padding-block: 72px 96px; position: relative; overflow: hidden; }
+.hero::after { content: ""; position: absolute; inset: 0; background-image: repeating-linear-gradient(90deg, transparent 0 79px, rgba(255,255,255,0.035) 79px 80px); pointer-events: none; }
+.hero .wrap { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 64px; align-items: center; position: relative; z-index: 1; }
+.hero h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); line-height: 1.02; letter-spacing: -0.02em; }
+.hero h1 em { font-style: italic; color: var(--brass-on-band); }
+.hero-copy { display: grid; gap: 26px; min-width: 0; }
+.hero .lede { font-size: 1.2rem; }
+.hero-points { list-style: none; margin: -8px 0 0; padding: 0; display: grid; gap: 10px; font-size: 1.08rem; color: var(--on-band); }
+.hero-points li { position: relative; padding-left: 26px; }
+.hero-points li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 12px; height: 12px; border-radius: 50%; background: var(--brass-on-band); }
+.ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px 26px; font-family: var(--mono); font-size: 0.8rem; color: var(--on-band-muted); padding-top: 8px; border-top: 1px solid var(--band-line); }
+.facts span::before { content: "✓ "; color: var(--brass-on-band); }
+@media (max-width: 920px) { .hero .wrap { grid-template-columns: 1fr; gap: 48px; } }
+@media (max-width: 640px) { .counter { display: none; } }
+
+/* Receipt */
+.counter { position: relative; display: grid; justify-items: center; }
+.receipt { width: min(100%, 360px); background: var(--receipt); color: var(--receipt-ink); font-family: var(--mono); font-size: 0.82rem; line-height: 1.55; padding: 26px 24px 30px; transform: rotate(-1.5deg); box-shadow: 0 30px 60px -20px rgba(0,0,0,.55); position: relative;
+  -webkit-mask: radial-gradient(circle 6px at 50% 100%, transparent 98%, #000) 0 0 / 14px 100% repeat-x; mask: radial-gradient(circle 6px at 50% 100%, transparent 98%, #000) 0 0 / 14px 100% repeat-x; animation: print 900ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes print { from { transform: rotate(-1.5deg) translateY(-14px); opacity: .0; } to { transform: rotate(-1.5deg) translateY(0); opacity: 1; } }
+.receipt .rhead { text-align: center; display: grid; gap: 2px; padding-bottom: 12px; border-bottom: 1px dashed #A9B3AC; }
+.receipt .rhead b { letter-spacing: .14em; font-weight: 500; }
+.receipt .row { display: flex; justify-content: space-between; gap: 12px; }
+.receipt .sect { padding: 12px 0; border-bottom: 1px dashed #A9B3AC; display: grid; gap: 2px; }
+.receipt .big { font-size: 1.05rem; font-weight: 500; }
+.receipt .zero { color: var(--ok); }
+.stamp { margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--ok); color: var(--ok); padding: 4px 10px; font-weight: 500; letter-spacing: .1em; transform: rotate(-4deg); }
+.receipt .small { font-size: 0.72rem; color: #5A675F; }
+.tag { position: absolute; z-index: 3; top: -12px; right: max(8px, calc(50% - 170px)); font-family: var(--mono); font-size: 0.7rem; letter-spacing: .1em; text-transform: uppercase; background: var(--brass-on-band); color: #1A1406; padding: 4px 9px; border-radius: 3px; transform: rotate(3deg); }
+.card { width: min(86%, 300px); aspect-ratio: 1.586; margin-top: -26px; transform: rotate(4deg); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between; color: #EEF3EF; background: linear-gradient(140deg, #13553A, #062B1B 70%); border: 1px solid #2D6A4C; box-shadow: 0 24px 50px -18px rgba(0,0,0,.6); position: relative; z-index: 2; max-width: 100%; }
+.card .top { display: flex; justify-content: space-between; align-items: center; font-family: var(--display); font-size: 1.1rem; }
+.mini { display: inline-flex; align-items: center; gap: 8px; font-family: var(--body); font-weight: 800; letter-spacing: -0.04em; line-height: 1; text-align: left; }
+.mini svg { flex: none; width: 1.35em; height: 1.35em; }
+.mini .wm small { display: block; font-size: 0.36em; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase; margin-top: 3px; opacity: .8; text-align: center; padding-left: 0.32em; }
+.r-logo { justify-self: center; font-size: 1.3rem; color: #0B3A25; margin-bottom: 4px; }
+.r-logo .wm > span { color: #9C6A1C; }
+.c-logo { font-size: 1.1rem; color: #EEF3EF; }
+.c-logo .wm > span { color: #D9AE5F; }
+.chip { width: 34px; height: 26px; border-radius: 5px; background: linear-gradient(135deg, #E2C17D, #A97D2E); }
+.card .num { font-family: var(--mono); font-size: 0.95rem; letter-spacing: .14em; }
+.card .bot { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.66rem; letter-spacing: .08em; text-transform: uppercase; color: #BBD0C2; }
+
+/* Mission */
+.mission { padding-block: 72px; border-bottom: 1px solid var(--line); }
+.mission p { font-family: var(--display); font-size: clamp(1.5rem, 3.2vw, 2.25rem); line-height: 1.3; max-width: 30ch; }
+.mission .wrap { display: grid; grid-template-columns: 180px 1fr; gap: 24px; }
+.mission p em { color: var(--green); font-style: italic; }
+@media (max-width: 720px) { .mission .wrap { grid-template-columns: 1fr; } }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid var(--ink); }
+.stat { padding: 22px 20px 6px 0; display: grid; gap: 6px; align-content: start; border-right: 1px solid var(--line); padding-left: 20px; }
+.stat:first-child { padding-left: 0; }
+.stat:last-child { border-right: 0; }
+.stat .n { font-family: var(--display); font-size: clamp(2.6rem, 5vw, 3.6rem); line-height: 1; font-variant-numeric: tabular-nums; }
+.stat.good .n { color: var(--green); }
+.stat p { color: var(--muted); font-size: 0.95rem; }
+@media (max-width: 820px) { .stats { grid-template-columns: 1fr 1fr; } .stat { border-right: 0; padding-left: 0; border-bottom: 1px solid var(--line); padding-bottom: 18px; } }
+
+/* Lanes */
+.lanes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.lane { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 32px; display: grid; gap: 22px; align-content: start; min-width: 0; }
+.lane .label { display: flex; align-items: center; gap: 10px; }
+.lane .pill { font-family: var(--mono); font-size: 0.72rem; letter-spacing: .1em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--green-soft); color: var(--green); }
+.lane.two .pill { color: var(--brass); }
+.lane > p { color: var(--muted); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 14px; padding: 13px 0; border-top: 1px solid var(--line); }
+.steps li::before { content: counter(s); font-family: var(--mono); font-size: 0.8rem; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line); color: var(--green); }
+.steps b { display: block; font-weight: 600; }
+.steps span { color: var(--muted); font-size: 0.95rem; }
+.lane .result { font-family: var(--mono); font-size: 0.85rem; padding: 12px 14px; border-radius: 10px; background: var(--green-soft); color: var(--green); }
+.lane.two .result { color: var(--brass); }
+.anywhere { margin-top: 24px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.anywhere div { background: var(--surface); padding: 22px; display: grid; gap: 6px; align-content: start; }
+.anywhere b { font-family: var(--display); font-size: 1.2rem; font-weight: 500; }
+.anywhere span { color: var(--muted); font-size: 0.93rem; }
+@media (max-width: 900px) { .lanes { grid-template-columns: 1fr; } .anywhere { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .anywhere { grid-template-columns: 1fr; } .lane { padding: 24px; } }
+
+/* Steering */
+.steer .wrap { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 64px; align-items: start; }
+.steer h2 .zero { font-family: var(--mono); font-weight: 500; color: var(--brass-on-band); letter-spacing: -0.04em; }
+.steer-copy { display: grid; gap: 22px; min-width: 0; }
+.steer-copy ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.steer-copy li { padding-left: 26px; position: relative; color: var(--on-band-muted); }
+.steer-copy li b { color: var(--on-band); font-weight: 600; }
+.steer-copy li::before { content: "→"; position: absolute; left: 0; color: var(--brass-on-band); }
+.compare { background: var(--band-2); border: 1px solid var(--band-line); border-radius: 18px; padding: 28px; display: grid; gap: 22px; min-width: 0; }
+.compare h3 { font-size: 1.2rem; }
+.bars { display: grid; gap: 18px; }
+.bar { display: grid; gap: 8px; }
+.bar .top { display: flex; justify-content: space-between; gap: 12px; font-size: 0.93rem; }
+.bar .top span:last-child { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--on-band-muted); }
+.track { height: 14px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.fill { height: 100%; border-radius: 3px; background: var(--on-band-muted); }
+.fill.pref { background: var(--brass-on-band); }
+.who-pays { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.who-pays div { border: 1px solid var(--band-line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+.who-pays small { font-family: var(--mono); font-size: 0.7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--on-band-muted); }
+.who-pays strong { font-family: var(--display); font-size: 1.5rem; font-weight: 500; line-height: 1.2; }
+.who-pays .z strong { color: var(--brass-on-band); }
+@media (max-width: 920px) { .steer .wrap { grid-template-columns: 1fr; gap: 40px; } }
+@media (max-width: 460px) { .who-pays { grid-template-columns: 1fr; } }
+
+/* Care trio */
+.trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.panel { border-top: 2px solid var(--green); padding-top: 22px; display: grid; gap: 14px; align-content: start; }
+.panel .k { font-family: var(--mono); font-size: 0.76rem; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); }
+.panel p { color: var(--muted); }
+.panel ul { margin: 0; padding-left: 18px; color: var(--muted); display: grid; gap: 6px; font-size: 0.96rem; }
+@media (max-width: 900px) { .trio { grid-template-columns: 1fr; gap: 36px; } }
+
+/* Gone ledger */
+.ledger { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.ledger .lrow { display: grid; grid-template-columns: 1.1fr 0.5fr 1.4fr; gap: 20px; padding: 16px 26px; border-top: 1px solid var(--line); align-items: baseline; }
+.ledger .lrow:first-child { border-top: 0; }
+.ledger .lh { font-family: var(--mono); font-size: 0.72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--green-soft); }
+.ledger .item { font-weight: 600; }
+.ledger .gone .item { text-decoration: line-through; text-decoration-color: var(--brass); text-decoration-thickness: 2px; color: var(--muted); }
+.ledger .status { font-family: var(--mono); font-size: 0.8rem; }
+.ledger .gone .status { color: var(--brass); }
+.ledger .stays .status { color: var(--green); }
+.ledger .note { color: var(--muted); font-size: 0.95rem; }
+@media (max-width: 680px) { .ledger .lrow { grid-template-columns: 1fr auto; gap: 4px 12px; padding: 14px 18px; } .ledger .note { grid-column: 1 / -1; } .ledger .lh .note { display: none; } }
+.two-up { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+.two-up div { background: var(--green-soft); border-radius: 18px; padding: 26px; display: grid; gap: 8px; }
+.two-up b { font-family: var(--display); font-size: 1.3rem; font-weight: 500; color: var(--green); }
+@media (max-width: 760px) { .two-up { grid-template-columns: 1fr; } }
+
+/* Platform */
+.platform .wrap { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; align-items: start; }
+.feed { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 8px 0; font-family: var(--mono); font-size: 0.82rem; min-width: 0; overflow-x: auto; }
+.feed .fr { display: grid; grid-template-columns: 74px 1fr auto; gap: 14px; padding: 12px 22px; border-top: 1px solid var(--line); align-items: center; min-width: 440px; }
+.feed .fr:first-child { border-top: 0; color: var(--muted); font-size: 0.72rem; letter-spacing: .08em; text-transform: uppercase; }
+.feed .amt { font-variant-numeric: tabular-nums; text-align: right; }
+.feed .ok { color: var(--green); }
+.feed .neg { color: var(--brass); }
+.checks { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 10px; }
+.checks li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; color: var(--muted); }
+.checks li::before { content: "✓"; color: var(--green); font-weight: 700; }
+.checks b { color: var(--ink); font-weight: 600; }
+@media (max-width: 920px) { .platform .wrap { grid-template-columns: 1fr; } }
+
+/* Savings */
+.calc { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 24px; }
+.calc-in, .calc-out { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 30px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+.calc label { font-weight: 600; }
+.calc .val { font-family: var(--display); font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--green); height: 28px; }
+.ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.presets { display: flex; gap: 8px; flex-wrap: wrap; }
+.presets button { font: inherit; font-size: 0.85rem; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.presets button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--bg); }
+.calc-out .big { font-family: var(--display); font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; color: var(--green); font-variant-numeric: tabular-nums; }
+.calc-out .grid3 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; border-top: 1px solid var(--line); padding-top: 18px; }
+.calc-out .grid3 small { display: block; font-family: var(--mono); font-size: 0.7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.calc-out .grid3 span { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+@media (max-width: 860px) { .calc { grid-template-columns: 1fr; } }
+.tbl-wrap { margin-top: 28px; overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 0.93rem; min-width: 640px; }
+th, td { text-align: left; padding: 13px 18px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; font-family: var(--mono); font-size: 0.7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--green-soft); }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.save { color: var(--green); font-weight: 600; }
+tfoot td { font-weight: 600; }
+
+/* CTA */
+.cta .wrap { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 56px; align-items: center; }
+.cta-box { border: 1px solid var(--band-line); border-radius: 18px; padding: 28px; display: grid; gap: 14px; background: var(--band-2); }
+.cta-box .row { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px dashed var(--band-line); font-size: 0.95rem; }
+.cta-box .row:last-of-type { border-bottom: 0; }
+.cta-box .row span:last-child { font-family: var(--mono); color: var(--brass-on-band); text-align: right; }
+.contact { font-family: var(--mono); font-size: 0.95rem; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.contact code { background: rgba(255,255,255,0.08); padding: 6px 10px; border-radius: 6px; user-select: all; }
+.copy { font: inherit; font-size: 0.8rem; border: 1px solid var(--band-line); background: transparent; color: var(--on-band); padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+@media (max-width: 880px) { .cta .wrap { grid-template-columns: 1fr; } }
+
+footer { padding-block: 40px 48px; background: var(--band); color: var(--on-band-muted); border-top: 1px solid var(--band-line); font-size: 0.85rem; }
+footer .wrap { display: grid; grid-template-columns: 1fr 2fr; gap: 32px; }
+footer .brand { color: var(--on-band); }
+footer p + p { margin-top: 8px; }
+@media (max-width: 760px) { footer .wrap { grid-template-columns: 1fr; } }
+
+/* Pages */
+.page[hidden] { display: none !important; }
+.page-head { padding-block: 72px 64px; }
+.page-head .head { margin-bottom: 0; }
+.page-head h1 { font-size: clamp(2.3rem, 5vw, 3.8rem); line-height: 1.05; }
+.nav nav a[aria-current="page"] { color: var(--on-band); box-shadow: inset 0 -2px 0 var(--brass-on-band); padding-bottom: 4px; }
+.mnav { display: none; border-top: 1px solid var(--band-line); }
+.mnav .wrap { display: flex; gap: 20px; overflow-x: auto; height: 44px; align-items: center; font-size: 0.9rem; scrollbar-width: none; }
+.mnav a { text-decoration: none; color: var(--on-band-muted); white-space: nowrap; }
+.mnav a[aria-current="page"] { color: var(--on-band); box-shadow: inset 0 -2px 0 var(--brass-on-band); padding-bottom: 3px; }
+@media (max-width: 880px) { .mnav { display: block; } }
+.explore { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.xcard { display: grid; gap: 10px; align-content: start; text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px; transition: border-color .15s ease, transform .15s ease; }
+.xcard:hover { border-color: var(--green); transform: translateY(-2px); }
+.xcard .k { font-family: var(--mono); font-size: 0.74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); }
+.xcard > b { font-family: var(--display); font-size: clamp(1.15rem, 1.6vw, 1.5rem); font-weight: 700; line-height: 1.2; color: var(--brass); white-space: nowrap; letter-spacing: -0.01em; }
+@media (max-width: 980px) { .xcard > b { font-size: 1.5rem; } }
+.xcard span { color: var(--muted); font-size: 0.95rem; }
+.xlist { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); font-size: 0.95rem; }
+.xcard .xlist b { font-family: var(--body); font-size: inherit; line-height: inherit; color: var(--ink); font-weight: 600; }
+.xcard .go { color: var(--green); font-weight: 600; font-size: 0.92rem; }
+@media (max-width: 980px) { .explore { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 540px) { .explore { grid-template-columns: 1fr; } }
+.strip { padding-block: 56px; }
+.strip .wrap { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; }
+.strip h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); max-width: 26ch; }
+.next { margin-top: 48px; display: flex; justify-content: flex-end; }
+.next a { font-weight: 600; color: var(--green); text-decoration: none; font-size: 1.02rem; }
+.next a:hover { text-decoration: underline; }
+.lists { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.lists .lane ul { margin: 0; padding-left: 18px; color: var(--muted); display: grid; gap: 8px; }
+@media (max-width: 760px) { .lists { grid-template-columns: 1fr; } }
+.foot-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 14px; }
+.foot-links a { text-decoration: none; color: var(--on-band-muted); }
+.foot-links a:hover { color: var(--on-band); }
+</style>
+</head>
+<body>
+
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#home" aria-label="CounterPay Health home">
+      <svg class="coin" viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="27" fill="var(--brass-on-band)"/><circle cx="29" cy="29" r="21" fill="none" stroke="var(--band)" stroke-width="1.5" opacity=".45"/><path d="M29 16v26M16 29h26" stroke="var(--band)" stroke-width="7" stroke-linecap="round"/></svg><span class="wm">Counter<span>Pay</span><small>Health</small></span>
+    </a>
+    <nav aria-label="Pages">
+      <a href="#how-it-works">How it works</a>
+      <a href="#steering">$0 Steering</a>
+      <a href="#care">Nurses &amp; Pharmacy</a>
+      <a href="#platform">Platform</a>
+      <a href="#savings">Savings</a>
+    </nav>
+    <a class="btn btn-brass" href="#contact">Get a savings analysis</a>
+  </div>
+  <div class="mnav">
+    <div class="wrap" aria-label="Pages">
+      <a href="#home">Home</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#steering">$0 Steering</a>
+      <a href="#care">Nurses &amp; Pharmacy</a>
+      <a href="#platform">Platform</a>
+      <a href="#savings">Savings</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ============ HOME ============ -->
+<div class="page" data-page="home">
+  <section class="band hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="eyebrow">For self-insured employers</span>
+        <h1>Pay for health care <em>at the counter.</em></h1>
+        <p class="lede">CounterPay enables your members to pay providers directly at cash prices, backed by your self-insured plan.</p>
+        <ul class="hero-points">
+          <li>No claims for providers to process and no inflated pre-negotiated rates.</li>
+          <li>Reconciled and administered by CounterPay against your plan.</li>
+          <li>Cutting your plan's costs by 20%+.</li>
+        </ul>
+        <div class="ctas">
+          <a class="btn btn-brass" href="#contact">Request a savings analysis</a>
+          <a class="btn btn-ghost" href="#how-it-works">See how it works</a>
+        </div>
+        <div class="facts">
+          <span>Any provider, any time</span>
+          <span>$0 at recommended providers</span>
+          <span>Sold direct, no brokers</span>
+        </div>
+      </div>
+      <div class="counter" aria-label="Example: a member pays for an MRI with CounterPay">
+        <span class="tag">Example visit</span>
+        <div class="receipt">
+          <div class="rhead">
+            <span class="mini r-logo"><svg viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="27" fill="#C9993F"/><circle cx="29" cy="29" r="21" fill="none" stroke="#0B3A25" stroke-width="1.5" opacity=".45"/><path d="M29 16v26M16 29h26" stroke="#0B3A25" stroke-width="7" stroke-linecap="round"/></svg><span class="wm">Counter<span>Pay</span><small>Health</small></span></span>
+            <span class="small">Self-pay patient · paid at the visit</span>
+          </div>
+          <div class="sect">
+            <div>Riverside Imaging Center</div>
+            <div class="small">MRI, knee, without contrast</div>
+            <div class="small">Routed by 24/7 nurse line</div>
+          </div>
+          <div class="sect">
+            <div class="row"><span>Cash price</span><span>$475.00</span></div>
+            <div class="row"><span>Plan rules check</span><span>Passed</span></div>
+            <div class="row"><span>Your plan pays</span><span>$475.00</span></div>
+          </div>
+          <div class="sect">
+            <div class="row big zero"><span>You pay</span><span>$0.00</span></div>
+            <div class="small">Recommended provider: $0 for the member</div>
+          </div>
+          <div class="stamp">✓ APPROVED · DAY 0</div>
+        </div>
+        <div class="card" aria-hidden="true">
+          <div class="top"><span class="mini c-logo"><svg viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="27" fill="#D9AE5F"/><circle cx="29" cy="29" r="21" fill="none" stroke="#062B1B" stroke-width="1.5" opacity=".45"/><path d="M29 16v26M16 29h26" stroke="#062B1B" stroke-width="7" stroke-linecap="round"/></svg><span class="wm">Counter<span>Pay</span><small>Health</small></span></span><span class="chip"></span></div>
+          <div class="num">•••• •••• •••• 4821</div>
+          <div class="bot"><span>Self-pay patient</span><span>Debit</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mission">
+    <div class="wrap">
+      <span class="eyebrow">Our mission</span>
+      <p>Unlock higher quality health care at <em>free market prices</em> by designing solutions that bring the patient and provider together.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">The problem</span>
+        <h2>Employers pay more than twice what care costs to deliver.</h2>
+        <p class="lede">The gap is network markups, billing overhead and your money. The average hospital runs at 1.1x what Medicare pays. Self-funded employers pay on average 2.5x, and up to 3.3x for some specialists.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="n">2.5×</div><p>what employers pay hospitals, compared with Medicare</p></div>
+        <div class="stat"><div class="n">2.9×</div><p>for hospital outpatient care: imaging, surgery, labs</p></div>
+        <div class="stat"><div class="n">3.3×</div><p>for anesthesia, care no patient can shop for</p></div>
+        <div class="stat good"><div class="n">1.1×</div><p>what it costs the average hospital to deliver that care</p></div>
+      </div>
+      <p class="fine" style="margin-top:22px">Commercial prices as a multiple of Medicare. Sources: RAND hospital price study (Dec 2024, 2022 claims); Urban Institute (2021); MedPAC (March 2026).</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">CounterPay</span>
+        <h2>Cash pay, backed by your plan.</h2>
+        <p class="lede">We don't pre-contract rates or rely on insurance companies to set pricing. Members can seek care anywhere, any time. CounterPay plans pay the cash price for the services backed by your plan.</p>
+      </div>
+      <div class="explore">
+        <a class="xcard" href="#how-it-works"><b>Two ways to Pay</b><ol class="xlist"><li><b>Routine care:</b> pay at the register with your CounterPay Card.</li><li><b>Emergency care:</b> we settle the bill within 30 days.</li></ol><span class="go">Read more →</span></a>
+        <a class="xcard" href="#steering"><b>$0 Steering</b><span>Members who pick a recommended provider over the ER pay no co-pay.</span><span class="go">Read more →</span></a>
+        <a class="xcard" href="#care"><b>24/7 Nurse Triage</b><span>Chat, call and video to handle simple diagnoses, prescriptions and recommend reasonable-cost local providers that match the patient's symptoms.</span><span class="go">Read more →</span></a>
+        <a class="xcard" href="#care"><b>Integrated Pharmacy</b><span>Integrated pharmacy services at cost-plus prices.</span><span class="go">Read more →</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band strip">
+    <div class="wrap">
+      <h2>See what your plan would have paid with CounterPay.</h2>
+      <a class="btn btn-brass" href="#contact">Request a savings analysis</a>
+    </div>
+  </section>
+</div>
+
+<!-- ============ HOW IT WORKS ============ -->
+<div class="page" data-page="how-it-works" hidden>
+  <section class="band page-head">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">How CounterPay works</span>
+        <h1>Two ways to pay. Members are cash patients in both.</h1>
+        <p class="lede">CounterPay is a TPA-backed payments product that unlocks cash pay, backed by your self-insured plan. Members carry a debit card and an app. Providers see a self-pay patient and get paid like one.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="lanes">
+        <article class="lane one">
+          <div class="label"><span class="pill">Routine care</span></div>
+          <h3>Pay at the register</h3>
+          <p>Pay at the register with your CounterPay Card. Upload the superbill. Done.</p>
+          <ol class="steps">
+            <li><div><b>Find care</b><span>The app or a nurse points to a high-quality provider, often at $0 to the member.</span></div></li>
+            <li><div><b>Check in as self-pay</b><span>No insurance card and no claim. Scheduled care starts with a price agreed in advance.</span></div></li>
+            <li><div><b>Pay with your CounterPay Card</b><span>Tap the card at the register, backed by your employer's plan.</span></div></li>
+            <li><div><b>Upload the superbill</b><span>Snap it in the app. Plan rules are checked and your plan records update.</span></div></li>
+          </ol>
+          <div class="result">Paid at the register. Done.</div>
+        </article>
+        <article class="lane two">
+          <div class="label"><span class="pill">Emergency care</span></div>
+          <h3>We settle the bill</h3>
+          <p>Submit the superbill to CounterPay. Our bill negotiation team settles the bill with the provider within 30 days.</p>
+          <ol class="steps">
+            <li><div><b>Get care anywhere</b><span>The member registers as self-pay. No network to check.</span></div></li>
+            <li><div><b>Submit the superbill</b><span>Upload it in the app, or the provider sends it with your CounterPay number.</span></div></li>
+            <li><div><b>Our team negotiates</b><span>Our bill negotiation team audits every line and agrees a fair price in writing.</span></div></li>
+            <li><div><b>Bill paid</b><span>You approve the agreed price and your share in the app, and we pay the provider.</span></div></li>
+          </ol>
+          <div class="result">Settled with the provider within 30 days.</div>
+        </article>
+      </div>
+      <div class="anywhere">
+        <div><b>No pre-contracted rates</b><span>We never lock in a network's inflated prices.</span></div>
+        <div><b>No insurance company</b><span>Pricing is set by the market and by our negotiators.</span></div>
+        <div><b>Any provider, any time</b><span>Members can seek care anywhere; there's no network to stay inside.</span></div>
+        <div><b>Nothing for providers to join</b><span>No claim, no portal sign-up, no contract.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">What goes away</span>
+        <h2>Fewer vendors, and no claims for anyone.</h2>
+      </div>
+      <div class="ledger">
+        <div class="lrow lh"><span>Today</span><span>With us</span><span class="note">Why</span></div>
+        <div class="lrow gone"><span class="item">Broker commissions</span><span class="status">Gone</span><span class="note">We sell direct and take no commissions.</span></div>
+        <div class="lrow gone"><span class="item">Rented PPO network</span><span class="status">Gone</span><span class="note">Cash prices replace contracted rates.</span></div>
+        <div class="lrow gone"><span class="item">Repricing vendors</span><span class="status">Gone</span><span class="note">Our negotiation team does this work.</span></div>
+        <div class="lrow gone"><span class="item">Claims, denials and EOBs</span><span class="status">Gone</span><span class="note">Plan rules are checked before payment, not after.</span></div>
+        <div class="lrow gone"><span class="item">Separate nurse line and navigation</span><span class="status">Gone</span><span class="note">Built into CounterPay.</span></div>
+        <div class="lrow gone"><span class="item">Pharmacy benefit manager</span><span class="status">Mostly gone</span><span class="note">Cash at the pharmacy; a PBM only for a few high-cost drugs.</span></div>
+        <div class="lrow stays"><span class="item">Stop-loss protection</span><span class="status">Stays</span><span class="note">Tracked and reported automatically.</span></div>
+      </div>
+      <div class="two-up">
+        <div><b>For providers</b><p>Paid at the visit or within 30 days, in full. No claim to code, no denials, no patient balances to chase and nothing to sign up for.</p></div>
+        <div><b>For members</b><p>$0 at recommended providers. Approve in the app and tap to pay. Every bill comes through us, so there are no surprise bills or collections letters.</p></div>
+      </div>
+      <div class="next"><a href="#steering">Next: $0 Steering →</a></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ STEERING ============ -->
+<div class="page" data-page="steering" hidden>
+  <section class="band steer">
+    <div class="wrap">
+      <div class="steer-copy">
+        <span class="eyebrow">$0 Steering</span>
+        <h1 style="font-size:clamp(2.3rem,5vw,3.8rem);line-height:1.05">Choose a recommended provider and pay <span class="zero" style="font-family:var(--mono);color:var(--brass-on-band);letter-spacing:-0.04em">$0</span>.</h1>
+        <p class="lede">In the app, members find high-quality providers at fair cash prices. When they pick one of those instead of the ER or a hospital outpatient department, CounterPay sets their cost to $0. The member saves, and the plan saves far more.</p>
+        <ul>
+          <li><b>Shown before they go.</b> "$0 for you" appears in care search and comes from the nurse line.</li>
+          <li><b>Applied automatically.</b> At a recommended provider, the member's share is set to $0 when the receipt is checked.</li>
+          <li><b>Steered where it matters.</b> Orthopedic walk-in clinics and urgent care instead of the ER, plus imaging, outpatient surgery and labs, where prices vary most for the same service.</li>
+        </ul>
+      </div>
+      <div class="compare" aria-label="Price comparison for the same outpatient surgery">
+        <h3>Same outpatient surgery, two settings</h3>
+        <div class="bars">
+          <div class="bar">
+            <div class="top"><span>Hospital outpatient department</span><span>289% of Medicare</span></div>
+            <div class="track"><div class="fill" style="width:96%"></div></div>
+          </div>
+          <div class="bar">
+            <div class="top"><span>Ambulatory surgery center</span><span>171% of Medicare</span></div>
+            <div class="track"><div class="fill pref" style="width:57%"></div></div>
+          </div>
+        </div>
+        <div class="who-pays">
+          <div><small>Hospital: member pays</small><strong>Deductible + coinsurance</strong></div>
+          <div class="z"><small>Recommended: member pays</small><strong>$0</strong></div>
+        </div>
+        <p class="fine">Surgery centers average 41% lower prices than hospital outpatient departments (RAND, 2024).</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="trio">
+        <div class="panel">
+          <span class="k">Where it matters</span>
+          <h3>Urgent needs and planned care</h3>
+          <p>Many ER visits don't need an ER. Members get the same care faster at a walk-in clinic, and planned care costs far less outside the hospital.</p>
+          <ul>
+            <li>Orthopedic walk-in clinics for sprains, strains and broken bones</li>
+            <li>Urgent care for non-emergencies</li>
+            <li>Imaging at independent centers</li>
+            <li>Outpatient surgery at surgery centers</li>
+            <li>Labs at independent labs</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <span class="k">Why it pays for itself</span>
+          <h3>The plan saves far more than it waives</h3>
+          <p>Moving a procedure from a hospital outpatient department to a surgery center saves about 40% of its cost. The member's share the plan covers is a small part of that.</p>
+        </div>
+        <div class="panel">
+          <span class="k">HSA plans</span>
+          <h3>Works with high-deductible plans</h3>
+          <p>In HSA-qualified high-deductible plans, $0 applies once the deductible is met. Before that, employers can reward the choice with an HSA contribution.</p>
+        </div>
+      </div>
+      <div class="next"><a href="#care">Next: Nurses &amp; Pharmacy →</a></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ CARE ============ -->
+<div class="page" data-page="care" hidden>
+  <section class="band page-head">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Nurses &amp; Pharmacy</span>
+        <h1>Care and pharmacy, included in the plan.</h1>
+        <p class="lede">The services employers usually buy as separate point solutions come with CounterPay.</p>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="trio">
+        <div class="panel">
+          <span class="k">24/7 nurse triage</span>
+          <h3>A nurse first, free for members</h3>
+          <p>The first line of defense for primary care, any hour of the day.</p>
+          <ul>
+            <li>Free calls and messages for every member</li>
+            <li>Diagnosis and prescriptions where needed</li>
+            <li>Routes members to recommended providers, where they pay $0</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <span class="k">Integrated pharmacy</span>
+          <h3>Prescriptions at cash prices</h3>
+          <p>Members fill prescriptions the same way they pay for a visit.</p>
+          <ul>
+            <li>Cash generics through cost-plus pharmacies</li>
+            <li>Manufacturer-direct prices for brand drugs</li>
+            <li>A PBM only as a fallback for a few high-cost drugs</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <span class="k">Bill negotiation</span>
+          <h3>A team on the member's side</h3>
+          <p>Our negotiators work every bill that doesn't settle at the counter.</p>
+          <ul>
+            <li>Prices agreed before scheduled care</li>
+            <li>Line-item audits on every hospital bill</li>
+            <li>Offers anchored to a fair multiple of Medicare</li>
+          </ul>
+        </div>
+      </div>
+      <div class="next"><a href="#platform">Next: Platform →</a></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ PLATFORM ============ -->
+<div class="page" data-page="platform" hidden>
+  <section class="band page-head">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Plan administration</span>
+        <h1>Every payment reconciled, tracked and audited.</h1>
+        <p class="lede">CounterPay runs on our self-insured administration platform. Every payment posts to your plan as it happens, with a complete audit trail.</p>
+      </div>
+    </div>
+  </section>
+  <section class="platform">
+    <div class="wrap">
+      <div>
+        <h2 style="font-size:clamp(1.6rem,3vw,2.2rem)">One place for your whole plan</h2>
+        <ul class="checks">
+          <li><div><b>Reconcile</b> each payment to employer funding automatically.</div></li>
+          <li><div><b>Track</b> deductibles, out-of-pocket maximums and stop-loss in real time.</div></li>
+          <li><div><b>Audit</b> every line, with the receipt or bill behind each payment.</div></li>
+          <li><div><b>Report</b> on spending, savings and steering for your finance team.</div></li>
+        </ul>
+      </div>
+      <div class="feed" role="table" aria-label="Example plan activity">
+        <div class="fr" role="row"><span>Day</span><span>Activity (example)</span><span class="amt">Plan paid</span></div>
+        <div class="fr" role="row"><span>Day 0</span><span>Urgent care visit · <span class="ok">paid at counter</span></span><span class="amt">$145.00</span></div>
+        <div class="fr" role="row"><span>Day 0</span><span>Knee MRI · <span class="ok">$0 recommended</span></span><span class="amt">$475.00</span></div>
+        <div class="fr" role="row"><span>Day 0</span><span>Generic statin, 90 days · <span class="ok">cash pharmacy</span></span><span class="amt">$11.40</span></div>
+        <div class="fr" role="row"><span>Day 12</span><span>ER bill received · <span class="neg">negotiating</span></span><span class="amt">pending</span></div>
+        <div class="fr" role="row"><span>Day 21</span><span>ER bill agreed at 150% of Medicare · <span class="ok">paid</span></span><span class="amt">$1,860.00</span></div>
+        <div class="fr" role="row"><span>Live</span><span>Deductibles, stop-loss and funding updated</span><span class="amt ok">✓</span></div>
+      </div>
+    </div>
+    <div class="wrap"><div class="next"><a href="#savings">Next: Savings →</a></div></div>
+  </section>
+</div>
+
+<!-- ============ SAVINGS ============ -->
+<div class="page" data-page="savings" hidden>
+  <section class="band page-head">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Savings</span>
+        <h1>We expect to cut claims costs 20% to 30%.</h1>
+        <p class="lede">Estimate your savings by plan size. Year one is likely nearer 20%; steering members to $0 providers is how plans reach 30%.</p>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="calc">
+        <div class="calc-in">
+          <label for="emp">Enrolled employees</label>
+          <div class="val" id="empVal">500</div>
+          <input type="range" id="emp" min="200" max="5000" step="50" value="500" aria-describedby="empHelp">
+          <div class="ticks"><span>200</span><span>2,600</span><span>5,000</span></div>
+          <div class="presets" role="group" aria-label="Plan size presets">
+            <button type="button" data-n="200" id="p200">200</button>
+            <button type="button" data-n="500" id="p500">500</button>
+            <button type="button" data-n="1000" id="p1000">1,000</button>
+            <button type="button" data-n="2500" id="p2500">2,500</button>
+            <button type="button" data-n="5000" id="p5000">5,000</button>
+          </div>
+          <p class="fine" id="empHelp">One enrolled employee is one policy, covering the employee and any family on it. 500 enrolled employees is roughly 1,050 people.</p>
+        </div>
+        <div class="calc-out" aria-live="polite">
+          <small class="eyebrow">Estimated savings a year</small>
+          <div class="big" id="saveRange">$1.4M to $2.1M</div>
+          <div class="grid3">
+            <div><small>Claims spend today</small><span id="spend">$7.1M</span></div>
+            <div><small>Per enrolled employee</small><span>$2,833 to $4,250</span></div>
+          </div>
+          <p class="fine">Assumes about $14,200 a year in claims per enrolled employee (KFF 2025 average premiums, 82% spent on care). Your number comes from a repricing analysis of your last 12 months of claims.</p>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Where employers' money goes</th><th>Share of spend</th><th>Price today vs. Medicare</th><th>CounterPay price</th><th>Saved on that spend</th></tr></thead>
+          <tbody>
+            <tr><td>Hospital inpatient stays</td><td class="num">~19%</td><td class="num">2.6×</td><td>~1.5×</td><td class="num save">~40%</td></tr>
+            <tr><td>Hospital outpatient: imaging, surgery, labs</td><td class="num">~27%</td><td class="num">2.9×</td><td>~1.5×, or a surgery center</td><td class="num save">~48%</td></tr>
+            <tr><td>Doctors and specialists</td><td class="num">~30%</td><td class="num">1.4×</td><td>~1.25×, paid as cash</td><td class="num save">~10%</td></tr>
+            <tr><td>Pharmacy</td><td class="num">~24%</td><td>List prices</td><td>Cash generics, manufacturer direct</td><td class="num save">10–20%</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="4">Self-insured plans with CounterPay</td><td class="num save">~27%</td></tr></tfoot>
+        </table>
+      </div>
+      <p class="fine" style="margin-top:14px">Spending shares: hospital facilities 46% (HCCI, 2023); split and other shares estimated. Prices: RAND (2024) for hospitals; MedPAC (2023) for doctors.</p>
+      <div class="next"><a href="#contact">Next: Get a savings analysis →</a></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ CONTACT ============ -->
+<div class="page" data-page="contact" hidden>
+  <section class="band cta page-head">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Get started</span>
+        <h1>See what your plan would have paid with CounterPay.</h1>
+        <p class="lede">Send us 12 months of claims. We'll reprice every line at CounterPay prices and show you the savings, at no cost.</p>
+        <div class="contact" style="margin-top:8px">
+          <code id="email">hello@counterpayhealth.com</code>
+          <button class="copy" type="button" id="copyBtn">Copy email</button>
+        </div>
+      </div>
+      <div class="cta-box">
+        <div class="row"><span>Built for</span><span>Self-insured employers</span></div>
+        <div class="row"><span>Plan size</span><span>200–5,000 employees</span></div>
+        <div class="row"><span>How we sell</span><span>Direct, no brokers</span></div>
+        <div class="row"><span>Provider contracts needed</span><span>None</span></div>
+        <div class="row"><span>Expected savings</span><span>20%+</span></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap lists">
+      <div class="lane">
+        <span class="pill" style="justify-self:start">What we need</span>
+        <h3>From your team</h3>
+        <ul>
+          <li>12 months of medical and pharmacy claims</li>
+          <li>Your current plan document or summary of benefits</li>
+          <li>An employee census, with no names needed</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <span class="pill" style="justify-self:start">What you get</span>
+        <h3>Your savings analysis</h3>
+        <ul>
+          <li>Every claim repriced at CounterPay prices</li>
+          <li>Where your money goes today, by type of care</li>
+          <li>Steering opportunities: care that could have cost members $0</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <span class="brand"><svg class="coin" viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="27" fill="var(--brass-on-band)"/><circle cx="29" cy="29" r="21" fill="none" stroke="var(--band)" stroke-width="1.5" opacity=".45"/><path d="M29 16v26M16 29h26" stroke="var(--band)" stroke-width="7" stroke-linecap="round"/></svg><span class="wm">Counter<span>Pay</span><small>Health</small></span></span>
+      <div class="foot-links">
+        <a href="#how-it-works">How it works</a><a href="#steering">$0 Steering</a><a href="#care">Nurses &amp; Pharmacy</a><a href="#platform">Platform</a><a href="#savings">Savings</a><a href="#contact">Contact</a>
+      </div>
+    </div>
+    <div>
+      <p>Members are covered by their employer's self-insured health plan and pay providers as self-pay patients. Plan administration is provided with a licensed third-party administrator.</p>
+      <p>Savings figures are estimates; actual results depend on each plan's claims, design and member choices. Example prices on this site are illustrative. In HSA-qualified high-deductible plans, $0 at recommended providers applies once the deductible is met.</p>
+      <p>© 2026 CounterPay Health</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // ---- page routing ----
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var names = pages.map(function (p) { return p.dataset.page; });
+  var links = document.querySelectorAll('.nav nav a, .mnav a');
+  function show() {
+    var h = location.hash.replace('#', '');
+    var name = names.indexOf(h) >= 0 ? h : 'home';
+    pages.forEach(function (p) { p.hidden = p.dataset.page !== name; });
+    links.forEach(function (a) {
+      if (a.getAttribute('href') === '#' + name) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', show);
+  show();
+
+  // ---- savings estimator ----
+  var PER = 14166;
+  var r = document.getElementById('emp');
+  var empVal = document.getElementById('empVal');
+  var spend = document.getElementById('spend');
+  var save = document.getElementById('saveRange');
+  var btns = document.querySelectorAll('.presets button');
+  function money(v) {
+    if (v >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
+    return '$' + Math.round(v / 1000) + 'k';
+  }
+  function update() {
+    var n = +r.value;
+    var s = n * PER;
+    empVal.textContent = n.toLocaleString('en-US');
+    spend.textContent = money(s);
+    save.textContent = money(s * 0.2) + ' to ' + money(s * 0.3);
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.n === n)); });
+  }
+  r.addEventListener('input', update);
+  btns.forEach(function (b) { b.addEventListener('click', function () { r.value = b.dataset.n; update(); }); });
+  update();
+
+  // ---- copy email ----
+  var cb = document.getElementById('copyBtn');
+  cb.addEventListener('click', function () {
+    var el = document.getElementById('email');
+    function done(msg) { cb.textContent = msg; setTimeout(function () { cb.textContent = 'Copy email'; }, 1800); }
+    function fallback() {
+      var range = document.createRange(); range.selectNodeContents(el);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); done('Selected');
+    }
+    try { navigator.clipboard.writeText(el.textContent).then(function () { done('Copied'); }, fallback); } catch (e) { fallback(); }
+  });
+})();
+</script>
+
+</body>
+</html>
